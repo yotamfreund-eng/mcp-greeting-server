@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: mcp-greeting-server-test
+
+logging:
+  level:
+    root: WARN
+    com.example.mcpgreeting: DEBUG

@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mcp-greeting-server
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: gpt-4
+          temperature: 0.7
+
+mcp:
+  server:
+    name: greeting
+    version: 1.0.0
+    description: "MCP server providing greeting functionality"
+
+logging:
+  level:
+    root: INFO
+    com.example.mcpgreeting: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

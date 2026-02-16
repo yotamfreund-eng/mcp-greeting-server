@@ -1,0 +1,89 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+}
+
+ext {
+    springAiVersion = '1.1.2'
+}
+
+dependencies {
+    // Spring Boot Web - Required for MCP server HTTP/SSE endpoints
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Spring Boot Actuator - Health checks and monitoring endpoints
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Spring AI MCP Server - Base starter (STDIO, SSE transports)
+    implementation 'org.springframework.ai:spring-ai-starter-mcp-server'
+
+    // Spring AI MCP Server - WebMVC support for HTTP endpoints
+    implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
+
+    // Spring AI OpenAI - For OpenAI integration (if using OpenAI models)
+    implementation 'org.springframework.ai:spring-ai-openai'
+
+    // MCP Security - Provides @McpTool, @McpToolParam annotations
+    implementation 'org.springaicommunity:mcp-server-security:0.0.6'
+
+    // Configuration processor - Generates metadata for application.yml properties
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Lombok for cleaner code
+    // NOTE: Lombok is not fully compatible with Java 25
+    // If you encounter compilation errors, remove these dependencies and use standard Java getters/setters
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
+}
+
+springBoot {
+    mainClass = 'com.example.mcpgreeting.McpGreetingApplication'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    archiveFileName = "${project.name}-${project.version}.jar"
+    mainClass = 'com.example.mcpgreeting.McpGreetingApplication'
+}
+
+// Task to print the Java version being used
+tasks.register('printJavaVersion') {
+    doLast {
+        println "Java Version: ${java.toolchain.languageVersion.get()}"
+    }
+}
