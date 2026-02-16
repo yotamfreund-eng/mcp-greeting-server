@@ -36,7 +36,6 @@
 ### Technology Stack
 
 - **Java Version**: OpenJDK 25 (Eclipse Temurin)
-  - JAVA_HOME: `C:\Users\YFreund\.jdks\openjdk-25.0.1`
   - Toolchain configured for Java 25
 - **Build Tool**: Gradle 9.2.1
 - **Framework**: Spring Boot 3.4.3 with Spring AI 1.0.0-M5

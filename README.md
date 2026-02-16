@@ -231,13 +231,13 @@ This project follows standard Java coding conventions. Please ensure your code:
 
 **Problem**: Build fails with "Unsupported class file major version 69" or Java version errors
 
-**Solution**: Ensure you're using Java 25:
+**Solution**: Ensure you're using Java 25. If needed, set JAVA_HOME to your Java 25 installation:
 ```cmd
-set "JAVA_HOME=C:\Users\YFreund\.jdks\openjdk-25.0.1"
+set "JAVA_HOME=C:\path\to\your\java-25"
 gradlew.bat build
 ```
 
-Or use the provided build script which sets the correct environment:
+Or use the provided build script which handles the environment:
 ```cmd
 scripts\build.bat
 ```
@@ -264,8 +264,15 @@ For issues and questions, please open an issue in the GitHub repository.
 
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [MCP Specification](https://spec.modelcontextprotocol.io/)
+- [MCP Inspector](https://github.com/modelcontextprotocol/inspector) - Testing and debugging tool
 - [Spring AI Documentation](https://docs.spring.io/spring-ai/reference/)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+
+### Project Documentation
+
+- [Testing Guide](docs/TESTING.md) - How to test with MCP Inspector
+- [Setup Guide](docs/SETUP.md) - Detailed project setup information
+- [IntelliJ Gradle Build](docs/INTELLIJ_GRADLE_BUILD.md) - IDE configuration
 
 ## Changelog
 

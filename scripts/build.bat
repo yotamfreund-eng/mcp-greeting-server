@@ -8,7 +8,7 @@ REM Change to repository root
 cd /d "%~dp0\.."
 
 REM Set JAVA_HOME if needed (uncomment and adjust path)
-REM set "JAVA_HOME=C:\Users\YFreund\.jdks\openjdk-25.0.1"
+REM set "JAVA_HOME=C:\path\to\your\java-25"
 
 REM Clean and build the project (skip tests due to Java 25 class file format)
 call gradlew.bat clean build

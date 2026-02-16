@@ -9,7 +9,7 @@ REM Change to repository root
 cd /d "%~dp0\.."
 
 REM Set JAVA_HOME if needed (uncomment and adjust path)
-REM set "JAVA_HOME=C:\Users\YFreund\.jdks\openjdk-25.0.1"
+REM set "JAVA_HOME=C:\path\to\your\java-25"
 
 REM Run the application
 call gradlew.bat bootRun
