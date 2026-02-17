@@ -178,6 +178,77 @@ gradlew.bat clean build -x test
 
 3. **Open the Inspector URL** in your browser.
 
+#### Method 3: Streamable HTTP Transport (Recommended for Production)
+
+Streamable HTTP is the recommended transport for production deployments. It provides better performance, connection management, and supports keep-alive functionality.
+
+**Configuration**: The project is already configured for Streamable HTTP in `application.yml`:
+
+```yaml
+spring:
+  ai:
+    mcp:
+      server:
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /mcp
+          keep-alive-interval: 60s
+          disallow-delete: false
+        request-timeout: 120s
+```
+
+**Steps**:
+
+1. **Start the MCP server**:
+   ```cmd
+   gradlew.bat bootRun
+   ```
+   
+   Or use the helper script:
+   ```cmd
+   scripts\start.bat
+   ```
+
+2. **In another terminal, start MCP Inspector with Streamable HTTP**:
+   ```bash
+   npx @modelcontextprotocol/inspector http://localhost:8080/mcp
+   ```
+   
+   **Note**: The Inspector automatically detects Streamable HTTP protocol when you provide an HTTP URL without specifying a transport type.
+
+3. **Open the Inspector URL** in your browser (typically `http://localhost:5173`).
+
+**Streamable HTTP Features**:
+- **Keep-Alive**: Server sends keep-alive messages every 60 seconds to maintain connection
+- **Connection Management**: Better handling of long-running connections
+- **Request Timeout**: 120-second timeout prevents premature disconnects
+- **HTTP Methods**: Supports GET (connection), POST (messages), DELETE (cleanup)
+
+**Testing the Connection**:
+
+You can also manually test the Streamable HTTP endpoint using curl:
+
+1. **Initialize a connection**:
+   ```cmd
+   curl -X POST http://localhost:8080/mcp -H "Content-Type: application/json" -d "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test-client\",\"version\":\"1.0.0\"}},\"id\":1}"
+   ```
+
+2. **List available tools**:
+   ```cmd
+   curl -X POST http://localhost:8080/mcp -H "Content-Type: application/json" -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":2}"
+   ```
+
+3. **Call a tool**:
+   ```cmd
+   curl -X POST http://localhost:8080/mcp -H "Content-Type: application/json" -d "{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"name\":\"greet\",\"arguments\":{\"name\":\"Alice\",\"style\":\"friendly\"}},\"id\":3}"
+   ```
+
+**Troubleshooting Streamable HTTP**:
+- Ensure the server is running on port 8080
+- Check that `spring.ai.mcp.server.protocol` is set to `STREAMABLE`
+- Verify the MCP endpoint is accessible: `http://localhost:8080/mcp`
+- Check application logs for any connection errors
+
 ### Using MCP Inspector
 
 Once MCP Inspector is running in your browser:

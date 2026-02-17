@@ -13,10 +13,24 @@ spring:
   ai:
     mcp:
       server:
+        enabled: true
+        protocol: STREAMABLE
+        # Server type (SYNC for blocking WebMVC, ASYNC for reactive WebFlux)
+        type: SYNC
+        version: ${projectVersion}
+        # MCP Capabilities (all enabled by default)
+        capabilities:
+          tool: true
+        # Change notifications
         tool-callback-converter: true  # Enable automatic detection and registration of @Tool annotated methods
         tool-change-notification: true  # Enable tool change notifications
-        capabilities:
-          tool: true  # Enable tools capability
+        # Streamable HTTP specific settings
+        streamable-http:
+          mcp-endpoint: /mcp
+          keep-alive-interval: 60s
+          disallow-delete: false
+        # Request timeout (increased to prevent premature disconnects)
+        request-timeout: 120s
     openai:
       api-key: ${OPENAI_API_KEY:}
       chat:
@@ -29,6 +43,16 @@ mcp:
     name: greeting
     version: 1.0.0
     description: "MCP server providing greeting functionality"
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:

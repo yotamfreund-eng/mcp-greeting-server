@@ -76,6 +76,14 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+tasks.named('processResources') {
+    filesMatching('application*.yml') {
+        filter { line ->
+            line.replace('${projectVersion}', project.findProperty('projectVersion') ?: '1.0.0')
+        }
+    }
+}
+
 tasks.named('bootJar') {
     archiveFileName = "${project.name}-${project.version}.jar"
     mainClass = 'com.example.mcpgreeting.McpGreetingApplication'
