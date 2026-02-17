@@ -90,11 +90,6 @@ gradlew.bat clean build -x test
 
 ### Environment Setup
 
-- Always set JAVA_HOME when running Gradle commands:
-  ```cmd
-  set "JAVA_HOME=C:\Users\YFreund\\.jdks\\openjdk-25.0.1"
-  ```
-
 ### Git Workflow
 
 - All scripts should be executable and tested

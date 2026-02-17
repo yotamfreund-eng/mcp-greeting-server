@@ -96,25 +96,64 @@ There are two ways to connect MCP Inspector to your server:
 
 #### Method 1: STDIO Transport (Direct JAR execution)
 
+**⚠️ CRITICAL CONFIGURATION REQUIREMENT:**
+
+STDIO transport requires the following configuration in `application.yml` or `application-stdio.yml`:
+
+```yaml
+spring:
+  ai:
+    mcp:
+      server:
+        stdio: true  # REQUIRED: Enable STDIO transport
+```
+
+Without this configuration, the MCP server will not respond to STDIO transport connections. See the [Spring AI MCP Documentation](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html) for details.
+
+**This configuration has been added to the project.** If you're using an older version of the code, rebuild:
+```cmd
+gradlew.bat clean build -x test
+```
+
 1. **Build the JAR**:
    ```cmd
    gradlew.bat build
    ```
 
 2. **Start MCP Inspector with STDIO**:
-   ```bash
-   npx @modelcontextprotocol/inspector java -jar build/libs/mcp-greeting-server-1.0.0.jar
-   ```
 
-   On Windows (PowerShell):
-   ```powershell
-   npx "@modelcontextprotocol/inspector" java -jar build/libs/mcp-greeting-server-1.0.0.jar
-   ```
-
-   On Windows (CMD):
+   **IMPORTANT**: 
+   - This project requires **Java 25**
+   - STDIO transport requires disabling console logging to prevent JSON parsing conflicts
+   - When using MCP Inspector, pass ONLY the command/script - do NOT add extra arguments
+   
+   **Option A: Using the helper script (Recommended)**
    ```cmd
-   npx @modelcontextprotocol/inspector java -jar build\libs\mcp-greeting-server-1.0.0.jar
+   npx @modelcontextprotocol/inspector scripts\run-stdio.bat
    ```
+   
+   **IMPORTANT**: Do NOT add arguments after the script name. The script already contains the complete command.
+   
+   **Option B: Manual command with Spring profile (Relative Path)**
+   ```cmd
+   npx @modelcontextprotocol/inspector java -Dspring.profiles.active=stdio -jar build/libs/mcp-greeting-server-1.0.0.jar
+   ```
+   
+   **Option C: Manual command with absolute path**
+   ```cmd
+   npx @modelcontextprotocol/inspector java -Dspring.profiles.active=stdio -jar C:/GitHub/yotamfreund-eng/mcp-greeting-server/build/libs/mcp-greeting-server-1.0.0.jar
+   ```
+   
+   **⚠️ CRITICAL - Windows Path Issue**: 
+   - **MUST use forward slashes (`/`) in JAR paths**, not backslashes (`\`)
+   - ❌ WRONG: `C:\GitHub\...\mcp-greeting-server-1.0.0.jar` (backslashes get stripped by npx)
+   - ✅ CORRECT: `C:/GitHub/.../mcp-greeting-server-1.0.0.jar` (forward slashes work on Windows)
+   - This is an npx/Node.js limitation on Windows - backslashes are removed during argument parsing
+   
+   **Other Notes**: 
+   - The `-Dspring.profiles.active=stdio` flag disables console logging (required for STDIO transport)
+   - Application logs will be written to `logs/mcp-greeting-server.log`
+   - Java path can use backslashes, but JAR path must use forward slashes
 
 3. **Open your browser**:
    
@@ -306,39 +345,60 @@ curl -X POST http://localhost:8080/api/v1/greet ^
 
 ## Troubleshooting
 
-### Inspector Can't Connect
 
-**Problem**: MCP Inspector fails to connect to the server
+### JSON Parsing Error with STDIO Transport
+
+**Problem**: MCP Inspector shows errors like:
+- `SyntaxError: Unexpected number in JSON at position 4`
+- `SyntaxError: Unexpected token . in JSON at position 2`
+- `SyntaxError: Unexpected token / in JSON at position 1`
+- `SyntaxError: Unexpected end of JSON input`
+- `Error from MCP server: SyntaxError: Unexpected number in JSON`
+- Inspector connection fails with JSON parsing errors
+
+**Root Cause**: One of two issues:
+
+1. **Spring Boot's console logging** is interfering with MCP's JSON-RPC protocol over STDIO. Both try to write to stdout, causing the Inspector to try parsing log messages as JSON.
+
+2. **MCP Inspector received extra arguments** - If you passed arguments after the script name like:
+   ```cmd
+   # WRONG - Don't do this:
+   npx @modelcontextprotocol/inspector scripts\run-stdio.bat -Dspring.profiles.active=stdio -jar build/libs/mcp-greeting-server-1.0.0.jar
+   ```
+   The Inspector treats everything after the script name as arguments TO the script, not part of the command itself.
 
 **Solutions**:
-1. Ensure the server is running:
+
+1. **Use the stdio profile** (Recommended):
    ```cmd
-   curl http://localhost:8080/api/v1/health
+   npx @modelcontextprotocol/inspector java -Dspring.profiles.active=stdio -jar build/libs/mcp-greeting-server-1.0.0.jar
+   ```
+   
+   This disables console logging and writes logs to `logs/mcp-greeting-server.log` instead.
+
+2. **Use the helper script WITH NO ARGUMENTS**:
+   ```cmd
+   npx @modelcontextprotocol/inspector scripts\run-stdio.bat
+   ```
+   
+   **IMPORTANT**: Do NOT add any arguments after the script name. The script already contains the complete command with the stdio profile.
+
+3. **Use SSE transport instead** (No STDIO issues):
+   ```cmd
+   gradlew.bat bootRun
+   npx @modelcontextprotocol/inspector --transport sse --url http://localhost:8080/mcp/sse
    ```
 
-2. Check that no firewall is blocking port 8080
+**Technical Details**: 
+- STDIO transport uses stdin/stdout for JSON-RPC messages
+- Spring Boot logs to stdout by default and displays a banner on startup
+- The `stdio` profile:
+  - Disables the Spring Boot banner (`spring.main.banner-mode: off`)
+  - Redirects all logs to a file (`logs/mcp-greeting-server.log`)
+  - Sets all logging levels to OFF for console output
+- This keeps stdout clean for MCP protocol messages only
+- Batch scripts should not echo anything to stdout when used with STDIO transport
 
-3. Verify Java 25 is being used:
-   ```cmd
-   java -version
-   ```
-
-### Tools Not Appearing in Inspector
-
-**Problem**: MCP tools don't show up in the Inspector
-
-**Solutions**:
-1. Rebuild the project:
-   ```cmd
-   gradlew.bat clean build
-   ```
-
-2. Restart the server
-
-3. Check the logs for any errors:
-   ```cmd
-   gradlew.bat bootRun --debug
-   ```
 
 ### STDIO Transport Issues
 

@@ -1,0 +1,24 @@
+# STDIO Profile: Only contains differences from application.yml
+# This profile is activated when running with --spring.profiles.active=stdio
+
+spring:
+  # Disable Spring Boot banner for STDIO transport
+  main:
+    banner-mode: off
+    web-application-type: none
+
+  ai:
+    mcp:
+      server:
+        stdio: true  # Enable STDIO transport
+
+# STDIO Profile: Disable console logging to prevent JSON parsing errors
+# When using STDIO transport, only MCP JSON-RPC messages should go to stdout
+logging:
+  level:
+    root: OFF
+    org.springframework: WARN
+  file:
+    name: logs/mcp-greeting-server.log
+  pattern:
+    console: ""

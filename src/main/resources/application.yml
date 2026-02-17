@@ -1,11 +1,22 @@
+debug: true
+
 server:
   port: 8080
 
 spring:
+  output:
+    ansi:
+      enabled: never
   application:
     name: mcp-greeting-server
 
   ai:
+    mcp:
+      server:
+        tool-callback-converter: true  # Enable automatic detection and registration of @Tool annotated methods
+        tool-change-notification: true  # Enable tool change notifications
+        capabilities:
+          tool: true  # Enable tools capability
     openai:
       api-key: ${OPENAI_API_KEY:}
       chat:

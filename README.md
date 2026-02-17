@@ -2,6 +2,7 @@
 
 A Model Context Protocol (MCP) server that provides greeting functionality, built with Java 25, Gradle, and Spring AI.
 
+
 ## Overview
 
 This server implements the Model Context Protocol to provide greeting-related tools and resources. It can be integrated with MCP-compatible clients to add greeting capabilities to AI assistants.
@@ -63,6 +64,8 @@ For Windows:
 ```cmd
 gradlew.bat build
 ```
+
+**Note**: If you have multiple Java versions installed, run `scripts\set-java-25.bat` first on Windows to ensure Java 25 takes priority.
 
 ## Running
 
@@ -181,7 +184,7 @@ mcp-greeting-server/
 │   ├── build.bat            # Windows build script
 │   └── start.bat            # Windows start script
 ├── docs/                     # Project documentation
-│   └── SETUP.md             # Setup guide
+│   └── TESTING.md           # Testing guide
 ├── .github/                  # GitHub configuration
 │   └── copilot-instructions.md
 ├── build/                    # Build output
@@ -271,8 +274,6 @@ For issues and questions, please open an issue in the GitHub repository.
 ### Project Documentation
 
 - [Testing Guide](docs/TESTING.md) - How to test with MCP Inspector
-- [Setup Guide](docs/SETUP.md) - Detailed project setup information
-- [IntelliJ Gradle Build](docs/INTELLIJ_GRADLE_BUILD.md) - IDE configuration
 
 ## Changelog
 
