@@ -18,15 +18,31 @@ docker build -t mcp-greeting-server:1.0.0 .
 
 ### STDIO Mode (MCP Standard)
 ```cmd
-# Interactive mode
+# Interactive mode with auto-remove (RECOMMENDED - no cleanup needed)
+docker run -i --rm mcp-greeting-server:latest
+
+# Interactive mode without auto-remove (keeps container for debugging)
 docker run -i mcp-greeting-server:latest
+# Stop with Ctrl+C, then run: docker rm <container-id>
 
-# Background mode
+# Interactive mode with friendly name
+docker run -i --name mcp-greeting mcp-greeting-server:latest
+# Stop with: docker stop mcp-greeting
+# Remove with: docker rm mcp-greeting
+
+# Background/detached mode with auto-remove
+docker run -d --rm --name mcp-greeting -i mcp-greeting-server:latest
+# Stop with: docker stop mcp-greeting (auto-removes)
+
+# Background/detached mode (keeps container)
 docker run -d --name mcp-greeting -i mcp-greeting-server:latest
-
-# Attach to background container
-docker attach mcp-greeting
+# Stop with: docker stop mcp-greeting
+# Remove with: docker rm mcp-greeting
 ```
+
+**Key**: 
+- `--rm` = Auto-removes container when stopped (no manual cleanup needed)
+- Without `--rm` = Container persists, need `docker stop` + `docker rm` to cleanup
 
 ### HTTP/SSE Mode
 ```cmd

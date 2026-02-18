@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.yotamfreund-eng/greeting",
+  "title": "MCP Greeting Server",
+  "description": "MCP server providing personalized greetings with AI-powered tools using Spring Boot and Spring AI",
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/yotamfreund-eng/mcp-greeting-server:latest",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
+

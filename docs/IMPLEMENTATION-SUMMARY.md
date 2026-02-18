@@ -329,6 +329,7 @@ The MCP Greeting Server now has a complete Docker/OCI image build system suitabl
 **Documentation References**:
 - Build guide: [docs/DOCKER.md](docs/DOCKER.md)
 - Quick reference: [docs/DOCKER-QUICKREF.md](docs/DOCKER-QUICKREF.md)
+- Publishing guide: [docs/PUBLISHING.md](docs/PUBLISHING.md)
 - Main README: [README.md](README.md)
 - MCP Registry: https://modelcontextprotocol.io/registry
 

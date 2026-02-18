@@ -1,5 +1,10 @@
 # MCP Greeting Server
 
+[![MCP Registry](https://img.shields.io/badge/MCP-Registry-blue?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMiA3TDEyIDEyTDIyIDdMMTIgMloiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0yIDEyTDEyIDE3TDIyIDEyIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMiAxN0wxMiAyMkwyMiAxNyIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+)](https://modelcontextprotocol.io/registry/io.github.yotamfreund-eng/greeting)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java 25](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.3-green.svg)](https://spring.io/projects/spring-boot)
+
 A Model Context Protocol (MCP) server that provides greeting functionality, built with Java 25, Gradle, and Spring AI.
 
 
@@ -7,7 +12,30 @@ A Model Context Protocol (MCP) server that provides greeting functionality, buil
 
 This server implements the Model Context Protocol to provide greeting-related tools and resources. It can be integrated with MCP-compatible clients to add greeting capabilities to AI assistants.
 
-## Quick Start
+## Installation
+
+### From MCP Registry
+
+This server is published on the [MCP Registry](https://modelcontextprotocol.io/registry/io.github.yotamfreund-eng/greeting) and can be installed directly:
+
+**Using Docker:**
+```json
+{
+  "mcpServers": {
+    "greeting": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "ghcr.io/yotamfreund-eng/mcp-greeting-server:latest"]
+    }
+  }
+}
+```
+
+Add this to your Claude Desktop configuration file:
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+### From Source
 
 ```cmd
 # Build (Windows)
@@ -95,8 +123,10 @@ This uses the Dockerfile and includes all MCP registry metadata labels:
 Run with STDIO transport (MCP registry standard):
 
 ```cmd
-docker run -i mcp-greeting-server:latest
+docker run -i --rm mcp-greeting-server:latest
 ```
+
+The `--rm` flag automatically removes the container when it stops (recommended for most use cases).
 
 Run with HTTP/SSE transport:
 
@@ -105,6 +135,22 @@ docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=default mcp-greeting-server:la
 ```
 
 For detailed Docker documentation, see [docs/DOCKER.md](docs/DOCKER.md).
+
+### Publishing to MCP Registry
+
+Once you've built and tested your Docker image, you can publish it to the MCP Registry for easy discovery and installation by users:
+
+```cmd
+# 1. Tag for your container registry (e.g., Docker Hub)
+docker tag mcp-greeting-server:1.0.0 YOUR_USERNAME/mcp-greeting-server:1.0.0
+
+# 2. Push to registry
+docker push YOUR_USERNAME/mcp-greeting-server:1.0.0
+
+# 3. Submit to MCP Registry at https://modelcontextprotocol.io/registry
+```
+
+For complete publishing instructions, see [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
 ## Running
 

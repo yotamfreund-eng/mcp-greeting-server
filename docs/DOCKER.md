@@ -42,21 +42,31 @@ The Dockerfile uses a multi-stage build to create an optimized final image.
 
 The built image includes MCP registry-compliant OCI labels:
 
+**MCP-Specific Labels:**
+| Label | Value | Description |
+|-------|-------|-------------|
+| `mcp.protocol.version` | 2024-11-05 | MCP protocol version |
+| `mcp.server.name` | greeting | MCP server name |
+| `mcp.server.version` | 1.0.0 | Server version |
+| `mcp.transport` | stdio | Transport type |
+| `io.modelcontextprotocol.server.name` | io.github.yotamfreund-eng/greeting | Registry identifier (must match mcp-registry.json name) |
+
+**OCI Standard Labels:**
 | Label | Value | Description |
 |-------|-------|-------------|
 | `org.opencontainers.image.title` | MCP Greeting Server | Image title |
 | `org.opencontainers.image.description` | Model Context Protocol server... | Image description |
 | `org.opencontainers.image.version` | 1.0.0 | Version |
-| `org.opencontainers.image.vendor` | com.example | Vendor |
+| `org.opencontainers.image.vendor` | com.example | Vendor/organization |
 | `org.opencontainers.image.licenses` | MIT | License |
-| `mcp.protocol.version` | 2024-11-05 | MCP protocol version |
-| `mcp.server.name` | greeting | MCP server name |
-| `mcp.server.version` | 1.0.0 | Server version |
-| `mcp.transport` | stdio | Transport type |
+| `org.opencontainers.image.source` | Repository URL | Source code repository |
+| `org.opencontainers.image.url` | Repository URL | Homepage URL |
+| `org.opencontainers.image.documentation` | README URL | Documentation URL |
+| `org.opencontainers.image.authors` | Yotam Freund | Author name |
 
 Inspect labels:
 ```cmd
-docker inspect mcp-greeting-server:latest
+docker inspect mcp-greeting-server:latest --format='{{json .Config.Labels}}' | jq
 ```
 
 ## Running the Container
@@ -65,9 +75,33 @@ docker inspect mcp-greeting-server:latest
 
 Run with STDIO transport for MCP client communication (this is the default):
 
+**Option 1: Auto-remove container (Recommended for testing)**
+```cmd
+docker run -i --rm mcp-greeting-server:latest
+```
+- The `--rm` flag automatically removes the container when it stops
+- No need to run `docker stop` or `docker rm` afterwards
+- **Best for**: Quick testing, MCP client configurations, one-time runs
+
+**Option 2: Keep container for debugging**
 ```cmd
 docker run -i mcp-greeting-server:latest
 ```
+- Container persists after stopping
+- Use `Ctrl+C` to stop the container
+- Later run `docker ps -a` to see stopped containers
+- Use `docker logs <container-id>` to view logs after stopping
+- **Need to cleanup**: `docker rm <container-id>` when done
+- **Best for**: Debugging, inspecting logs after crashes
+
+**Option 3: Named container (for long-running or repeated use)**
+```cmd
+docker run -i --name mcp-greeting mcp-greeting-server:latest
+```
+- Gives container a friendly name for easy reference
+- Stop with: `docker stop mcp-greeting`
+- Remove with: `docker rm mcp-greeting`
+- **Best for**: Development, repeated manual testing
 
 The container will:
 - Start with STDIO profile (default: `SPRING_PROFILES_ACTIVE=stdio` set in Dockerfile)
@@ -104,25 +138,40 @@ Access endpoints:
 - Streamable HTTP: `http://localhost:8080/mcp`
 - Health: `http://localhost:8080/actuator/health`
 
-### Background Mode
+### Background Mode (Detached)
 
-Run as detached container:
+Run as detached container (runs in background):
 
 ```cmd
 docker run -d --name mcp-greeting -i mcp-greeting-server:latest
 ```
 
-Interact with the server:
+The `-d` flag runs the container in the background (detached mode).
+
+**Manage the background container:**
 
 ```cmd
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker attach mcp-greeting
-```
-
-View logs:
-
-```cmd
+# View logs
 docker logs mcp-greeting
+
+# Follow logs in real-time
+docker logs -f mcp-greeting
+
+# Stop the container
+docker stop mcp-greeting
+
+# Remove the container
+docker rm mcp-greeting
+
+# Stop and remove in one command
+docker stop mcp-greeting && docker rm mcp-greeting
 ```
+
+**Note**: You can also use `--rm` with detached mode:
+```cmd
+docker run -d --rm --name mcp-greeting -i mcp-greeting-server:latest
+```
+This auto-removes the container when it stops.
 
 ## MCP Client Configuration
 
@@ -261,6 +310,7 @@ docker history mcp-greeting-server:latest
 
 ## Next Steps
 
+- See [PUBLISHING.md](PUBLISHING.md) for publishing to the MCP Registry
 - See [TESTING.md](TESTING.md) for testing the server
 - See [CONFIGURATION.md](CONFIGURATION.md) for configuration options
 - See [README.md](../README.md) for general server documentation
