@@ -1,28 +1,26 @@
-FROM eclipse-temurin:17-jdk-alpine AS builder
-
-WORKDIR /app
-
-# Copy gradle wrapper and build files
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle .
-COPY settings.gradle .
-
-# Copy source code
-COPY src src
-
-# Build the application
-RUN ./gradlew build -x test
-
 FROM eclipse-temurin:25-jre-alpine
 
+# Add OCI labels for MCP registry compliance
+LABEL org.opencontainers.image.title="MCP Greeting Server"
+LABEL org.opencontainers.image.description="Model Context Protocol server providing greeting functionality"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.vendor="com.example"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL mcp.protocol.version="2024-11-05"
+LABEL mcp.server.name="greeting"
+LABEL mcp.server.version="1.0.0"
+LABEL mcp.transport="stdio"
+
 WORKDIR /app
 
-# Copy the built jar from builder stage
-COPY --from=builder /app/build/libs/*.jar app.jar
+# Copy the pre-built jar from build/libs directory
+COPY build/libs/mcp-greeting-server-1.0.0.jar app.jar
 
-# Expose the port
+# Expose the port (for HTTP/SSE mode, not used in STDIO mode)
 EXPOSE 8080
 
-# Set the entrypoint
+# Set default profile to stdio (can be overridden with SPRING_PROFILES_ACTIVE env var)
+ENV SPRING_PROFILES_ACTIVE=stdio
+
+# Set the entrypoint - uses SPRING_PROFILES_ACTIVE env var
 ENTRYPOINT ["java", "-jar", "app.jar"]

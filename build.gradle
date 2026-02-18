@@ -89,6 +89,38 @@ tasks.named('bootJar') {
     mainClass = 'com.example.mcpgreeting.McpGreetingApplication'
 }
 
+// Disable bootBuildImage task - we use Dockerfile method instead
+tasks.named('bootBuildImage') {
+    enabled = false
+}
+
+// Task to build Docker image with full MCP labels using Dockerfile
+// Task to build Docker image with full MCP labels using Dockerfile
+// This provides more control over OCI labels including custom MCP metadata
+// Depends on bootJar to ensure the JAR is built before Docker image
+tasks.register('buildDockerImage', Exec) {
+    group = 'build'
+    description = 'Builds Docker image using Dockerfile with full MCP registry labels (requires Docker daemon)'
+
+    // Ensure JAR is built first
+    dependsOn 'bootJar'
+
+    // Verify JAR exists before building Docker image
+    doFirst {
+        def jarFile = file("${layout.buildDirectory.get().asFile}/libs/${project.name}-${project.version}.jar")
+        if (!jarFile.exists()) {
+            throw new GradleException("JAR file not found: ${jarFile.path}. Run 'gradlew build' first.")
+        }
+        println "Building Docker image with JAR: ${jarFile.path}"
+    }
+
+    workingDir project.rootDir
+    commandLine 'docker', 'build',
+        '-t', "mcp-greeting-server:${project.version}",
+        '-t', 'mcp-greeting-server:latest',
+        '.'
+}
+
 // Task to print the Java version being used
 tasks.register('printJavaVersion') {
     doLast {

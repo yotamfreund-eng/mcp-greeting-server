@@ -67,6 +67,45 @@ gradlew.bat build
 
 **Note**: If you have multiple Java versions installed, run `scripts\set-java-25.bat` first on Windows to ensure Java 25 takes priority.
 
+## Building Docker/OCI Images
+
+The server can be packaged as a Docker/OCI container image for deployment to the MCP registry or container platforms.
+
+### Quick Start
+
+```cmd
+# Build Docker image with full MCP registry labels
+scripts\build-image.bat
+```
+
+Or using Gradle directly:
+
+```cmd
+gradlew.bat buildDockerImage
+```
+
+This uses the Dockerfile and includes all MCP registry metadata labels:
+- `mcp.protocol.version`
+- `mcp.server.name`
+- `mcp.server.version`
+- `mcp.transport`
+
+### Running the Container
+
+Run with STDIO transport (MCP registry standard):
+
+```cmd
+docker run -i mcp-greeting-server:latest
+```
+
+Run with HTTP/SSE transport:
+
+```cmd
+docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=default mcp-greeting-server:latest
+```
+
+For detailed Docker documentation, see [docs/DOCKER.md](docs/DOCKER.md).
+
 ## Running
 
 Run the server:

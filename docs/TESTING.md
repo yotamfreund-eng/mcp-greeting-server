@@ -506,6 +506,226 @@ curl -X POST http://localhost:8080/api/v1/greet ^
 
 3. Restart the server
 
+## Testing Docker Image with MCP Inspector
+
+### Prerequisites
+
+1. **Build the Docker image**:
+   ```cmd
+   gradlew.bat buildDockerImage
+   ```
+   
+   Or use the build script:
+   ```cmd
+   scripts\build-image.bat
+   ```
+
+2. **Verify the image exists**:
+   ```cmd
+   docker images mcp-greeting-server
+   ```
+
+### Running MCP Inspector with Docker
+
+The MCP Inspector can connect to the MCP server running inside a Docker container using STDIO transport.
+
+#### Method 1: Direct Docker Command (Recommended)
+
+```cmd
+npx @modelcontextprotocol/inspector docker run -i --rm mcp-greeting-server:latest
+```
+
+**Explanation**:
+- `docker run -i` - Runs container in interactive mode (keeps stdin open)
+- `--rm` - Automatically removes container when it stops
+- `mcp-greeting-server:latest` - The Docker image to run
+- The Inspector communicates with the container via stdin/stdout
+
+#### Method 2: With Environment Variables
+
+If your MCP server needs environment variables (e.g., OpenAI API key):
+
+```cmd
+npx @modelcontextprotocol/inspector docker run -i --rm -e OPENAI_API_KEY=sk-your-key-here mcp-greeting-server:latest
+```
+
+#### Method 3: With Volume Mounts (for logs)
+
+To access logs from the container:
+
+**Windows (CMD) - Using string substitution (RECOMMENDED for CMD, works from any directory):**
+```cmd
+npx @modelcontextprotocol/inspector docker run -i --rm -v "%CD:\=/%/logs:/app/logs" mcp-greeting-server:latest
+```
+
+**Windows (PowerShell) - Using current directory (RECOMMENDED for PowerShell):**
+```powershell
+npx @modelcontextprotocol/inspector docker run -i --rm -v "${PWD}/logs:/app/logs" mcp-greeting-server:latest
+```
+
+**Linux/Mac - Using current directory:**
+```bash
+npx @modelcontextprotocol/inspector docker run -i --rm -v "$(pwd)/logs:/app/logs" mcp-greeting-server:latest
+```
+
+**⚠️ IMPORTANT - Windows CMD Volume Mount Path Solutions**: 
+- ✅ BEST for CMD: `"%CD:\=/%/logs:/app/logs"` - String substitution replaces backslashes with forward slashes
+  - `%CD:\=/%` means: take `%CD%` and replace all `\` with `/`
+  - Works from any directory automatically
+  - Portable and elegant solution
+- ✅ BEST for PowerShell: `"${PWD}/logs:/app/logs"` - PowerShell handles path conversion automatically
+- ❌ WRONG: `"%CD%/logs:/app/logs"` (causes "mkdir C:GitHubyotamfreund-eng..." errors)
+- ❌ WRONG: `"%CD%\logs:/app/logs"` (backslashes cause parsing issues)
+- ⚠️ ALTERNATIVE: Use absolute path with forward slashes (not portable: `"C:/path/to/project/logs:/app/logs"`)
+
+**Note**: The logs directory will be created automatically if it doesn't exist. You can also run without volume mounts - logs will stay inside the container.
+
+### Using MCP Inspector with Docker
+
+1. **Start the Inspector with Docker**:
+   ```cmd
+   npx @modelcontextprotocol/inspector docker run -i --rm mcp-greeting-server:latest
+   ```
+
+2. **Open your browser**:
+   The Inspector will output a URL like:
+   ```
+   Inspector running at http://localhost:5173
+   ```
+
+3. **Test the tools**:
+   - Navigate to the **Tools** tab
+   - Select a tool (e.g., `greet`)
+   - Fill in parameters:
+     ```json
+     {
+       "name": "Alice",
+       "style": "friendly"
+     }
+     ```
+   - Click "Call Tool"
+   - Verify the response
+
+### Troubleshooting Docker + Inspector
+
+#### Problem: "Cannot connect to the Docker daemon"
+
+**Solution**: Ensure Docker Desktop is running:
+```cmd
+docker info
+```
+
+#### Problem: "Image not found"
+
+**Solution**: Build the image first:
+```cmd
+gradlew.bat buildDockerImage
+```
+
+Or verify image exists:
+```cmd
+docker images mcp-greeting-server
+```
+
+#### Problem: Inspector shows JSON parsing errors
+
+**Solution**: The Docker image is configured with the `stdio` profile by default, which prevents console logging interference. If you still see issues:
+
+1. Check Docker logs separately:
+   ```cmd
+   docker run --name mcp-test -i mcp-greeting-server:latest
+   # In another terminal:
+   docker logs mcp-test
+   # Clean up:
+   docker rm mcp-test
+   ```
+
+2. Verify the container is using STDIO mode:
+   ```cmd
+   docker inspect mcp-greeting-server:latest | findstr SPRING_PROFILES_ACTIVE
+   ```
+
+#### Problem: Container exits immediately
+
+**Solution**: Ensure you're using the `-i` flag (interactive mode):
+```cmd
+# WRONG:
+npx @modelcontextprotocol/inspector docker run --rm mcp-greeting-server:latest
+
+# CORRECT:
+npx @modelcontextprotocol/inspector docker run -i --rm mcp-greeting-server:latest
+```
+
+#### Problem: "Access is denied" or "mkdir" error with volume mounts
+
+**Error message**: `docker: Error response from daemon: mkdir C:GitHubyotamfreund-engmcp-greeting-serverlogs: Access is ...`
+
+**Root Cause**: Windows CMD's `%CD%` variable expands to a path with backslashes (e.g., `C:\GitHub\...`), which Docker cannot parse correctly when passed through npx.
+
+**Solution 1**: Use **CMD string substitution** `%CD:\=/%` (BEST for CMD - works from any directory):
+```cmd
+npx @modelcontextprotocol/inspector docker run -i --rm -v "%CD:\=/%/logs:/app/logs" mcp-greeting-server:latest
+```
+- `%CD:\=/%` replaces all backslashes with forward slashes
+- Converts `C:\GitHub\project` to `C:/GitHub/project`
+- Portable - works from any directory where the repo is cloned
+
+**Solution 2**: Use **PowerShell with ${PWD}** (BEST for PowerShell - works from any directory):
+```powershell
+npx @modelcontextprotocol/inspector docker run -i --rm -v "${PWD}/logs:/app/logs" mcp-greeting-server:latest
+```
+
+**Solution 3**: Run without volume mounts (logs stay inside container):
+```cmd
+npx @modelcontextprotocol/inspector docker run -i --rm mcp-greeting-server:latest
+```
+
+**Solution 4**: Use an **absolute path with forward slashes** in CMD (not portable):
+```cmd
+REM Replace C:/path/to/your/project with your actual project path
+npx @modelcontextprotocol/inspector docker run -i --rm -v "C:/path/to/your/project/logs:/app/logs" mcp-greeting-server:latest
+```
+
+**Why this happens**: 
+- CMD's `%CD%` returns `C:\GitHub\...` with backslashes and colon
+- Docker on Windows needs paths in Unix-style format: `C:/path`
+- The `%CD%` variable with backslashes doesn't get properly converted when passed through npx and Docker
+- Using `%CD:\=/%` performs string substitution to replace `\` with `/`
+- PowerShell's `${PWD}` handles this conversion automatically
+
+**Tip**: You don't need volume mounts for basic testing with Inspector. Volume mounts are only useful if you want to persist or view logs after the container stops.
+
+### Comparing Docker vs JAR with Inspector
+
+| Aspect | Docker | JAR |
+|--------|--------|-----|
+| **Setup** | Build image once | Requires Java 25 installed |
+| **Command** | `docker run -i --rm mcp-greeting-server:latest` | `java -Dspring.profiles.active=stdio -jar build/libs/mcp-greeting-server-1.0.0.jar` |
+| **Portability** | ✅ Runs anywhere with Docker | ❌ Requires exact Java version |
+| **Size** | ~300 MB image | ~50 MB JAR + Java install |
+| **Startup** | Slightly slower (container overhead) | Faster |
+| **Best for** | Production, distribution, CI/CD | Local development, debugging |
+
+### Integration with MCP Clients using Docker
+
+**Claude Desktop**: Add to `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "greeting": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "mcp-greeting-server:latest"]
+    }
+  }
+}
+```
+
+**Generic MCP Client**: Use the command:
+```
+Command: docker
+Args: ["run", "-i", "--rm", "mcp-greeting-server:latest"]
+```
+
 ## Advanced Testing
 
 ### Testing with Custom MCP Client
