@@ -43,6 +43,7 @@ The Dockerfile uses a multi-stage build to create an optimized final image.
 The built image includes MCP registry-compliant OCI labels:
 
 **MCP-Specific Labels:**
+
 | Label | Value | Description |
 |-------|-------|-------------|
 | `mcp.protocol.version` | 2024-11-05 | MCP protocol version |
@@ -52,6 +53,7 @@ The built image includes MCP registry-compliant OCI labels:
 | `io.modelcontextprotocol.server.name` | io.github.yotamfreund-eng/greeting | Registry identifier (must match mcp-registry.json name) |
 
 **OCI Standard Labels:**
+
 | Label | Value | Description |
 |-------|-------|-------------|
 | `org.opencontainers.image.title` | MCP Greeting Server | Image title |
